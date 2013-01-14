@@ -332,7 +332,10 @@ first item is not the correct behavior. Instead, it must return
 an empty string like `completing-read'.
 
 When this mode is enabled, you can still select the first item on
-the list by prefixing \"RET\" with \"C-u\"."
+the list by prefixing \"RET\" with \"C-u\".
+
+When this mode is disabled, you can return nothing to simulate
+the behavior by prefixing \"RET\" with \"C-u\"."
   :type 'boolean
   :group 'ido-ubiquitous)
 
@@ -377,17 +380,18 @@ compatibility mode in non-interactive functions, customize
 See `ido-ubiquitous-enable-compatibility', which controls whether
 this advice has any effect."
   (if (and (eq ido-cur-item 'list)
-           ido-ubiquitous-enable-compatibility
-           ;; Only enable if we are replacing `completing-read'
-           ido-this-call-replaces-completing-read
+           (or
+            (and (not ido-ubiquitous-enable-compatibility) current-prefix-arg)
+            (and ido-ubiquitous-enable-compatibility (not current-prefix-arg)))
+           ;; (xor ido-ubiquitous-enable-compatibility current-prefix-arg)
+           ;; See `ido-ubiquitous-enable-compatibility' for an explanation.
+
            ;; Disable in command exceptions
            (not (memq this-command ido-ubiquitous-command-compatibility-exceptions))
            ;; Input is empty
            (string= ido-text "")
            ;; Default is nil
            (null ido-default-item)
-           ;; Prefix disables compatibility
-           (not current-prefix-arg)
            (string= (car ido-cur-list)
                     ido-ubiquitous-initial-item))
       (ido-select-text)
