@@ -379,23 +379,26 @@ compatibility mode in non-interactive functions, customize
 
 See `ido-ubiquitous-enable-compatibility', which controls whether
 this advice has any effect."
-  (if (and (eq ido-cur-item 'list)
-           (or
-            (and (not ido-ubiquitous-enable-compatibility) current-prefix-arg)
-            (and ido-ubiquitous-enable-compatibility (not current-prefix-arg)))
-           ;; (xor ido-ubiquitous-enable-compatibility current-prefix-arg)
-           ;; See `ido-ubiquitous-enable-compatibility' for an explanation.
+  
+  (let ((numeric-arg (prefix-numeric-value current-prefix-arg)))
+    (if (or (= numeric-arg 16)
+            (and (eq ido-cur-item 'list)
+                 (or
+                  (and (not ido-ubiquitous-enable-compatibility) (= numeric-arg 4))
+                  (and ido-ubiquitous-enable-compatibility (not current-prefix-arg)))
+                 ;; (xor ido-ubiquitous-enable-compatibility current-prefix-arg)
+                 ;; See `ido-ubiquitous-enable-compatibility' for an explanation.
 
-           ;; Disable in command exceptions
-           (not (memq this-command ido-ubiquitous-command-compatibility-exceptions))
-           ;; Input is empty
-           (string= ido-text "")
-           ;; Default is nil
-           (null ido-default-item)
-           (string= (car ido-cur-list)
-                    ido-ubiquitous-initial-item))
+                 ;; Disable in command exceptions
+                 (not (memq this-command ido-ubiquitous-command-compatibility-exceptions))
+                 ;; Input is empty
+                 (string= ido-text "")
+                 ;; Default is nil
+                 (null ido-default-item)
+                 (string= (car ido-cur-list)
+                          ido-ubiquitous-initial-item)))
       (ido-select-text)
-    ad-do-it)
+    ad-do-it))
   (setq ido-ubiquitous-initial-item nil))
 
 (defmacro ido-ubiquitous-disable-compatibility-in (func)
