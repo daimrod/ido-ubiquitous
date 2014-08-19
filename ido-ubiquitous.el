@@ -217,7 +217,9 @@ be used as the value of `completing-read-function'."
           ;; initial input and preprocess the choices list to put the
           ;; default at the head, then proceed with default = nil.
           (setq choices (delete-dups (append deflist (remove def choices)))
-                def nil))))
+                def nil)))
+      (setq choices (sort choices (lambda (a b)
+                                    (< (length a) (length b))))))
     ad-do-it))
 
 (defmacro ido-ubiquitous-disable-in (func)
